@@ -47,7 +47,7 @@ class CalendarCarousel extends StatefulWidget {
     left: 18.0,
   );
 
-  final List<String> weekDays;
+  List<String> weekDays;
   final double viewportFraction;
   final TextStyle prevDaysTextStyle;
   final TextStyle daysTextStyle;
@@ -79,9 +79,10 @@ class CalendarCarousel extends StatefulWidget {
   final EdgeInsets headerMargin;
   final double childAspectRatio;
   final EdgeInsets weekDayMargin;
+  final bool weeksStartOnMonday;
 
   CalendarCarousel({
-    this.weekDays = const ['Sun', 'Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sat'],
+    this.weekDays,
     this.viewportFraction = 1.0,
     this.prevDaysTextStyle,
     this.daysTextStyle,
@@ -113,6 +114,7 @@ class CalendarCarousel extends StatefulWidget {
     this.headerMargin = const EdgeInsets.symmetric(vertical: 16.0),
     this.childAspectRatio = 1.0,
     this.weekDayMargin = const EdgeInsets.only(bottom: 4.0),
+    this.weeksStartOnMonday = false,
   });
 
   @override
@@ -148,6 +150,9 @@ class _CalendarState extends State<CalendarCarousel> {
 
   @override
   Widget build(BuildContext context) {
+    widget.weekDays ??= widget.weeksStartOnMonday
+        ? const ['Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sat', 'Sun']
+        : const ['Sun', 'Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sat'];
     return Container(
       width: widget.width,
       height: widget.height,
@@ -157,8 +162,8 @@ class _CalendarState extends State<CalendarCarousel> {
             margin: widget.headerMargin,
             child: DefaultTextStyle(
               style: widget.headerTextStyle != null
-                ? widget.headerTextStyle
-                : widget.defaultHeaderTextStyle,
+                  ? widget.headerTextStyle
+                  : widget.defaultHeaderTextStyle,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
@@ -253,6 +258,7 @@ class _CalendarState extends State<CalendarCarousel> {
                 childAspectRatio: widget.childAspectRatio,
                 padding: EdgeInsets.zero,
                 children: List.generate(totalItemCount,
+
                     /// last day of month + weekday
                     (index) {
                   bool isToday =
@@ -268,6 +274,10 @@ class _CalendarState extends State<CalendarCarousel> {
                   bool isNextMonthDay = index >=
                       (DateTime(year, month + 1, 0).day) + this._startWeekday;
                   bool isThisMonthDay = !isPrevMonthDay && !isNextMonthDay;
+
+                  bool isWeekendDay = widget.weeksStartOnMonday
+                      ? (index % 7 == 5 || index % 7 == 6)
+                      : (index % 7 == 0 || index % 7 == 6);
 
                   DateTime now = DateTime(year, month, 1);
                   TextStyle textStyle;
@@ -340,22 +350,19 @@ class _CalendarState extends State<CalendarCarousel> {
                         children: <Widget>[
                           Center(
                             child: DefaultTextStyle(
-                              style: (index % 7 == 0 || index % 7 == 6) &&
-                                      !isSelectedDay &&
-                                      !isToday
+                              style: isWeekendDay && !isSelectedDay && !isToday
                                   ? widget.defaultWeekendTextStyle
                                   : isToday
                                       ? widget.defaultTodayTextStyle
                                       : defaultTextStyle,
                               child: Text(
                                 '${now.day}',
-                                style: (index % 7 == 0 || index % 7 == 6) &&
-                                        !isSelectedDay &&
-                                        !isToday
-                                    ? widget.weekendTextStyle
-                                    : isToday
-                                        ? widget.todayTextStyle
-                                        : textStyle,
+                                style:
+                                    isWeekendDay && !isSelectedDay && !isToday
+                                        ? widget.weekendTextStyle
+                                        : isToday
+                                            ? widget.todayTextStyle
+                                            : textStyle,
                                 maxLines: 1,
                               ),
                             ),
@@ -389,6 +396,10 @@ class _CalendarState extends State<CalendarCarousel> {
         /// setup current day
         _startWeekday = date1.weekday;
         _endWeekday = date2.weekday;
+        if (widget.weeksStartOnMonday) {
+          --_startWeekday;
+          --_endWeekday;
+        }
         this._dates = [
           date0,
           date1,
@@ -416,6 +427,10 @@ class _CalendarState extends State<CalendarCarousel> {
       this.setState(() {
         _startWeekday = dates[page].weekday;
         _endWeekday = dates[page + 1].weekday;
+        if (widget.weeksStartOnMonday) {
+          --_startWeekday;
+          --_endWeekday;
+        }
         this._dates = dates;
       });
 
@@ -453,8 +468,7 @@ class _CalendarState extends State<CalendarCarousel> {
   }
 
   Widget _renderMarked(DateTime now) {
-    if (widget.markedDates != null &&
-        widget.markedDates.length > 0) {
+    if (widget.markedDates != null && widget.markedDates.length > 0) {
       List<DateTime> markedDates = widget.markedDates.map((date) {
         return DateTime(date.year, date.month, date.day);
       }).toList();
