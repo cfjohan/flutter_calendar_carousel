@@ -71,7 +71,7 @@ class CalendarCarousel extends StatefulWidget {
   final TextStyle weekdayTextStyle;
   final Color iconColor;
   final TextStyle headerTextStyle;
-  final Widget headerText;
+  final Widget Function(DateTime) headerText;
   final TextStyle weekendTextStyle;
   final List<DateTime> markedDates;
   final Color markedDateColor;
@@ -176,7 +176,7 @@ class _CalendarState extends State<CalendarCarousel> {
                   ),
                   Container(
                     child: widget.headerText != null
-                        ? widget.headerText
+                        ? widget.headerText(this._dates[1])
                         : Text(
                             '${DateFormat.yMMM().format(this._dates[1])}',
                           ),
