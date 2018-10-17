@@ -20,6 +20,7 @@ For help getting started with Flutter, view our online
 | props | types | defaultValues |
 | :------------ |:---------------: |:---------------:|
 | weekDays | | ['Sun', 'Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sat'] |
+| weeksStartOnMonday | bool | false |
 | viewPortFraction | `double` | 1.0 |
 | prevDaysTextStyle | `TextStyle` | |
 | daysTextStyle | `TextStyle` | |
@@ -43,7 +44,7 @@ For help getting started with Flutter, view our online
 | weekdayTextStyle | `TextStyle` | `fontSize: 14.0, color: Colors.deepOrange` |
 | iconColor | `Color` | Colors.blueAccent |
 | headerTextStyle | `TextStyle` | `fontSize: 20.0, color: Colors.blue` |
-| headerText | `Text` | `Text('${DateFormat.yMMM().format(this._dates[1])}'`) |
+| headerText | `Function(DateTime) -> Widget` | `Text('${DateFormat.yMMM().format(this._dates[1])}'`) |
 | weekendTextStyle | `TextStyle` | `fontSize: 14.0, color: Colors.pinkAccent` |
 | markedDates | `List<DateTime` | [] |
 | markedDateColor | `Color` | Colors.blueAccent |
